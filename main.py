@@ -56,6 +56,7 @@ def index():
             <div class="nav-bar">
                 <a href="/add" class="add-link">Add New Word</a>
                 <a href="/categories" class="add-link" style="background: #2196F3;">View Categories</a>
+                <a href="/statistics" class="add-link" style="background: #FF9800;">View Statistics</a>
             </div>
         </div>
     </body>
@@ -148,6 +149,42 @@ def categories():
     </body>
     </html>
     ''', cats=cats)
+
+@app.route('/statistics')
+def statistics():
+    total_vocab = db['vocabulary'].count_documents({})
+    total_categories = db['categories'].count_documents({})
+    # Perhaps more stats, like average words per category, etc.
+    return render_template_string('''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Statistics</title>
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+            h1 { text-align: center; color: #333; }
+            .stat { background: #f9f9f9; margin: 10px 0; padding: 15px; border-radius: 5px; border-left: 5px solid #FF9800; }
+            .stat strong { color: #555; }
+            a { color: #FF9800; text-decoration: none; font-weight: bold; }
+            a:hover { text-decoration: underline; }
+            .back-link { display: block; text-align: center; margin-top: 20px; background: #FF9800; color: white; padding: 10px; border-radius: 5px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Statistics</h1>
+            <div class="stat">
+                <strong>Total Vocabulary Words:</strong> {{ total_vocab }}
+            </div>
+            <div class="stat">
+                <strong>Total Categories:</strong> {{ total_categories }}
+            </div>
+            <a href="/" class="back-link">Back to Vocabulary</a>
+        </div>
+    </body>
+    </html>
+    ''', total_vocab=total_vocab, total_categories=total_categories)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_word():
