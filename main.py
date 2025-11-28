@@ -30,7 +30,8 @@ def index():
             strong { color: #555; }
             a { color: #4CAF50; text-decoration: none; font-weight: bold; }
             a:hover { text-decoration: underline; }
-            .add-link { float: right; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; margin: 10px; }
+            .nav-bar { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+            .add-link { background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; }
             .add-link:hover { background: #45a049; }
         </style>
     </head>
@@ -50,12 +51,12 @@ def index():
                         <a href="/delete/{{ doc['_id'] }}" style="color: red;">Delete</a>
                     </div>
                 </li>
-                <button><a href="/edit/{{ doc._id }}">Edit</a></button>
-                <button><a href="/delete/{{ doc._id }}">Delete</a></button>
             {% endfor %}
             </ul>
-            <a href="/add" class="add-link">Add New Word</a>
-            <a href="/categories" class="add-link" style="background: #2196F3;">View Categories</a>
+            <div class="nav-bar">
+                <a href="/add" class="add-link">Add New Word</a>
+                <a href="/categories" class="add-link" style="background: #2196F3;">View Categories</a>
+            </div>
         </div>
     </body>
     </html>
