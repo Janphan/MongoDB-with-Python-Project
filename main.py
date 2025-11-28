@@ -81,14 +81,16 @@ def edit_word(id):
     <head>
         <title>Edit Word</title>
         <style>
-            body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+            body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
             h1 { text-align: center; color: #333; }
             form { display: flex; flex-direction: column; }
-            label { margin-bottom: 5px; font-weight: bold; }
-            input[type="text"] { padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; }
-            input[type="submit"] { background: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+            label { display: block; margin-bottom: 5px; font-weight: bold; }
+            input[type="text"] { padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; width: 100%; }
+            input[type="submit"] { background: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
             input[type="submit"]:hover { background: #45a049; }
+            .back-link { display: block; text-align: center; margin-top: 20px; background: #4CAF50; color: white; padding: 10px; border-radius: 5px; text-decoration: none; font-size: 16px; }
+            .back-link:hover { background: #45a049; }
         </style>
     </head>
     <body>
@@ -102,6 +104,7 @@ def edit_word(id):
                 <label>Categories: <input type="text" name="categories" value="{{ doc.get('categories', []) | join(', ') }}"></label>
                 <input type="submit" value="Update">
             </form>
+            <a href="/" class="back-link">Back to Home</a>
         </div>
     </body>
     </html>
@@ -137,7 +140,7 @@ def categories():
             <h1>Categories</h1>
             <ul>
             {% for cat in cats %}
-                <li>{{ cat.get('name', 'N/A') }} - {{ cat.get('description', 'N/A') }}</li>
+                <li>{% set name = cat.get('name', '') %}{% set desc = cat.get('description', '') %}{% if name %}{{ name }}{% if desc %} - {{ desc }}{% endif %}{% endif %}</li>
             {% endfor %}
             </ul>
             <a href="/" class="back-link">Back to Vocabulary</a>
@@ -149,13 +152,12 @@ def categories():
 @app.route('/add', methods=['GET', 'POST'])
 def add_word():
     if request.method == 'POST':
-        word = request.form['word']
-        definition = request.form['definition']
-        part_of_speech = request.form['part_of_speech']
         db['vocabulary'].insert_one({
-            'word': word,
-            'definition': definition,
-            'part_of_speech': part_of_speech
+            'word': request.form['word'],
+            'translation': request.form['translation'],
+            'partOfSpeech': request.form['partOfSpeech'],
+            'examples': [e.strip() for e in request.form['examples'].split(',') if e.strip()],
+            'categories': [c.strip() for c in request.form['categories'].split(',') if c.strip()]
         })
         return redirect(url_for('index'))
     return render_template_string('''
@@ -165,13 +167,15 @@ def add_word():
         <title>Add New Word</title>
         <style>
             body { font-family: Arial, sans-serif; background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 600px; width: 100%; }
             h1 { text-align: center; color: #333; }
             form { display: flex; flex-direction: column; }
-            label { margin-bottom: 5px; font-weight: bold; }
-            input[type="text"] { padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; }
-            input[type="submit"] { background: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+            label { display: block; margin-bottom: 5px; font-weight: bold; }
+            input[type="text"] { padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; width: 100%; }
+            input[type="submit"] { background: #4CAF50; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
             input[type="submit"]:hover { background: #45a049; }
+            .back-link { display: block; text-align: center; margin-top: 20px; background: #4CAF50; color: white; padding: 10px; border-radius: 5px; text-decoration: none; font-size: 16px; }
+            .back-link:hover { background: #45a049; }
         </style>
     </head>
     <body>
@@ -179,10 +183,13 @@ def add_word():
             <h1>Add New Word</h1>
             <form method="post">
                 <label>Word: <input type="text" name="word" required></label>
-                <label>Definition: <input type="text" name="definition"></label>
-                <label>Part of Speech: <input type="text" name="part_of_speech"></label>
-                <input type="submit" value="Add">
+                <label>Translation: <input type="text" name="translation" required></label>
+                <label>Part of Speech: <input type="text" name="partOfSpeech" placeholder="e.g., noun, verb" required></label>
+                <label>Examples: <input type="text" name="examples" placeholder="Separate with commas, e.g., sentence1, sentence2"></label>
+                <label>Categories: <input type="text" name="categories" placeholder="Separate with commas, e.g., Home & Living, A1 Basics"></label>
+                <input type="submit" value="Add Word">
             </form>
+            <a href="/" class="back-link">Back to Home</a>
         </div>
     </body>
     </html>
